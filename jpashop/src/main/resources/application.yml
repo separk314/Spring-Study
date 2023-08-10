@@ -15,4 +15,4 @@ spring:
 
 logging.level:
   org.hibernate.SQL: debug    # log로 출력
-  org.hibernate.type: trace
+  org.hibernate.type: trace   # Query parameter 출력
