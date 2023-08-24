@@ -1,6 +1,8 @@
 package jpabook.jpashop.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -9,6 +11,7 @@ import java.util.List;
 
 @Entity
 @Getter @Setter
+@AllArgsConstructor @NoArgsConstructor
 public class Member {
     @Id @GeneratedValue
     @Column(name = "member_id")   // Column명을 지정하지 않으면 이름이 id 그대로
