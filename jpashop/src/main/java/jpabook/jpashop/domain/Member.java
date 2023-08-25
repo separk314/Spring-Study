@@ -26,5 +26,4 @@ public class Member {
     @OneToMany(mappedBy = "member")  // order table의 member field에 의해 mapped
     private List<Order> orders = new ArrayList<>();
 
-
 }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController     // @Controller + @ResponseBody
 @RequiredArgsConstructor
@@ -54,6 +55,7 @@ public class MemberApiController {
         return new UpdateMemberResponse(findMember.getId(), findMember.getName());
     }
 
+
     /**
      * 회원 리스트 조회
      */
@@ -64,6 +66,21 @@ public class MemberApiController {
         return memberService.findMembers();
     }
 
+    @GetMapping("api/v2/members")
+    public Result memberV2() {
+        List<Member> members = memberService.findMembers();
+
+        // Member 객체 -> MemberDto로 변환
+        List<MemberDto> collect = members.stream()
+                .map(m -> new MemberDto(m.getName()))
+                .collect(Collectors.toList());
+
+        return new Result(collect);
+        /*
+            List로 바로 반환하지 않고 {}로 한번 감싸준다
+            (List 반환은 유연성이 떨어짐)
+         */
+    }
 
 
 
@@ -96,5 +113,15 @@ public class MemberApiController {
         private String name;
     }
 
+    @Data
+    @AllArgsConstructor
+    static class Result<T> {
+        private T data;
+    }
 
+    @Data
+    @AllArgsConstructor
+    static class MemberDto {
+        private String name;
+    }
 }
