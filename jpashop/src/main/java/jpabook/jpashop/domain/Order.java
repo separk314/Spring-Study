@@ -45,7 +45,7 @@ public class Order {
 
     public void addOrderItem(OrderItem orderItem) {
         orderItems.add(orderItem);
-        delivery.setOrder(this);    // 양방향 세팅
+        orderItem.setOrder(this);    // 양방향 세팅
     }
 
     public void setDelivery(Delivery delivery) {
@@ -58,11 +58,14 @@ public class Order {
         Order order = new Order();
         order.setMember(member);
         order.setDelivery(delivery);
+
         for (OrderItem orderItem: orderItems) {
             order.addOrderItem(orderItem);
         }
+
         order.setStatus(OrderStatus.ORDER);
         order.setOrderDate(LocalDateTime.now());
+
         return order;
     }
 

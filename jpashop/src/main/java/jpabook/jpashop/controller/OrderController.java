@@ -46,6 +46,8 @@ public class OrderController {
 
     @GetMapping("/orders")
     public String orderList(@ModelAttribute("orderSearch") OrderSearch orderSearch, Model model) {
+        System.out.println("OrderSearch!: " + orderSearch.getMemberName());
+        System.out.println("OrderSearch!: " + orderSearch.getOrderStatus());
         List<Order> orders = orderService.findOrders(orderSearch);
         model.addAttribute("orders", orders);
         return "order/orderList";
