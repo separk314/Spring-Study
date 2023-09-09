@@ -37,7 +37,7 @@ public class OrderSimpleApiController {
             // LAZY 강제 초기화(쿼리 실행시키기) -> 원하는 값만 가져옴
             order.getMember().getName();
             order.getDelivery().getAddress();
-            // orderItems는 초기화되지 않는다
+            // SimpleApi라서 orderItems는 초기화되지 않는다
         }
 
         return all;
