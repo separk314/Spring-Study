@@ -78,6 +78,17 @@ public class OrderRepository {
         ).getResultList();
     }
 
+
+    public List<Order> findAllWithMemberDelivery(int offset, int limit) {
+        return em.createQuery(
+                "select o from Order o" +
+                        " join fetch o.member" +
+                        " join fetch o.delivery d", Order.class
+                ).setFirstResult(offset)    // 페이징
+                 .setMaxResults(limit)
+                .getResultList();
+    }
+
     public List<OrderSimpleQueryDto> findOrderDtos() {
         return em.createQuery(
                         "select new jpabook.jpashop.repository.OrderSimpleQueryDto(o.id, m.name, o.orderDate, o.status, d.address)" +
@@ -86,4 +97,23 @@ public class OrderRepository {
                                 " join o.delivery d", OrderSimpleQueryDto.class)
                 .getResultList();
     }
+
+    public List<Order> findAllWithItem() {
+        // 패치 조인
+        // (실무에서) 복잡한 쿼리는 QueryDSL을 사용하자
+        return em.createQuery(
+                "select distinct o from Order o" +
+                        " join fetch o.member m" +
+                        " join fetch o.delivery d" +
+                        " join fetch o.orderItems oi" +
+                        " join fetch oi.item i", Order.class
+                ).setFirstResult(1)     // 페이징
+                .setMaxResults(100)
+                .getResultList();
+        /*
+            order와 orderItems를 join -> orderItems 개수만큼 중복된 결과가 생김
+            => distinct를 사용해서 중복 제거
+         */
+    }
+
 }
