@@ -19,7 +19,7 @@ public class OrderQueryRepository {
 
     private final EntityManager em;
 
-    // N+1 문제 발생
+    // 1. N+1 문제 발생하는 버전
     public List<OrderQueryDto> findOrderQueryDtos() {
         List<OrderQueryDto> result = findOrders();
 
@@ -31,13 +31,27 @@ public class OrderQueryRepository {
         return result;
     }
 
-    // 컬렉션 최적화 버전: id 리스트로 in-query 조회한 후 메모리에서 order-orderItems 매칭함
+    // 2. 컬렉션 최적화 버전: id 리스트로 in-query 조회한 후 메모리에서 order-orderItems 매칭함
     // 쿼리 2번 실행됨
     public List<OrderQueryDto> findAllByDto_optimization() {
         List<OrderQueryDto> result = findOrders();
         Map<Long, List<OrderItemQueryDto>> orderItemMap = findOrderItemMap(toOrderIds(result));
         result.forEach(o -> o.setOrderItems(orderItemMap.get(o.getOrderId())));
         return result;
+    }
+
+    // 3. flat 데이터 구조로 변경
+    // 쿼리 1번 실행됨(중복 데이터가 많아짐)
+    public List<OrderFlatDto> findAllByDto_flat() {
+        return em.createQuery(
+                "select new" +
+                        " jpabook.jpashop.repository.order.query.OrderFlatDto(o.id, m.name, o.orderDate, o.status, d.address, i.name, oi.orderPrice, oi.count)" +
+                        " from Order o" +
+                        " join o.member m" +
+                        " join o.delivery d" +
+                        " join o.orderItems oi " +
+                        " join oi.item i", OrderFlatDto.class)
+                .getResultList();
     }
 
     private Map<Long, List<OrderItemQueryDto>> findOrderItemMap(List<Long> orderIds) {
