@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -17,6 +19,7 @@ public class OrderQueryRepository {
 
     private final EntityManager em;
 
+    // N+1 문제 발생
     public List<OrderQueryDto> findOrderQueryDtos() {
         List<OrderQueryDto> result = findOrders();
 
@@ -26,6 +29,38 @@ public class OrderQueryRepository {
             o.setOrderItems(orderItems);
         });
         return result;
+    }
+
+    // 컬렉션 최적화 버전: id 리스트로 in-query 조회한 후 메모리에서 order-orderItems 매칭함
+    // 쿼리 2번 실행됨
+    public List<OrderQueryDto> findAllByDto_optimization() {
+        List<OrderQueryDto> result = findOrders();
+        Map<Long, List<OrderItemQueryDto>> orderItemMap = findOrderItemMap(toOrderIds(result));
+        result.forEach(o -> o.setOrderItems(orderItemMap.get(o.getOrderId())));
+        return result;
+    }
+
+    private Map<Long, List<OrderItemQueryDto>> findOrderItemMap(List<Long> orderIds) {
+        List<OrderItemQueryDto> orderItems = em.createQuery(
+                        "select new jpabook.jpashop.repository.order.query.OrderItemQueryDto(oi.order.id, i.name, oi.orderPrice, oi.count)" +
+                                " from OrderItem oi" +
+                                " join oi.item i" +
+                                " where oi.order.id in :orderIds", OrderItemQueryDto.class)
+                .setParameter("orderIds", orderIds)
+                .getResultList();
+
+        // 사용하기 쉽게 orderItems를 map으로 바꿈
+        Map<Long, List<OrderItemQueryDto>> orderItemMap = orderItems.stream()
+                .collect(Collectors.groupingBy(orderItemQueryDto -> orderItemQueryDto.getOrderId()));
+        return orderItemMap;
+    }
+
+    private List<Long> toOrderIds(List<OrderQueryDto> result) {
+        // result에서 id를 뽑아낸다
+        List<Long> orderIds = result.stream()
+                .map(o -> o.getOrderId())
+                .collect(Collectors.toList());
+        return orderIds;
     }
 
     private List<OrderItemQueryDto> findOrderItems(Long orderId) {
