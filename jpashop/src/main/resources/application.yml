@@ -13,7 +13,7 @@ spring:
       ddl-auto: create
     properties:
       hibernate:
-#        show_sql: true   # system.out으로 출력
+        show_sql: true   # system.out으로 출력
         format_sql: true
         default_batch_fetch_size: 100   # in query에서 in절에 들어가는 값의 개수를 100개로 제한
 
