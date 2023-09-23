@@ -1,37 +1,18 @@
 package jpabook.jpashop.repository;
 
 import jpabook.jpashop.domain.Member;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 
-@Repository     // @Repository: Component scan으로 Spring bean 자동 등록
-@RequiredArgsConstructor
-public class MemberRepository {
+public interface MemberRepository extends JpaRepository<Member, Long> {
+    // JpaRepository<T, ID>
+    // T: Entity, ID: Entity의 PK의 데이터 타입
 
-    // @PersistenceContext: Spring이 EntityManager 생성 후 주입
-    // -> @RequiredArgsConstructor가 생성자 자동 생성
-    private final EntityManager em;
-
-    public void save(Member member) {
-        em.persist(member);     // member 저장
-    }
-
-    public Member findOne(Long id) {
-        return em.find(Member.class, id);
-    }
-
-    public List<Member> findAll() {
-        return em.createQuery("select m from Member m", Member.class)
-                .getResultList();
-        // SQL과 비슷하지만 Entity(객체)에 대한 질의이다.
-    }
-
-    public List<Member> findByName(String name) {
-        return em.createQuery("select m from Member m where m.name = :name", Member.class)
-                .setParameter("name", name)
-                .getResultList();
-    }
+    List<Member> findByName(String name);
+    /*
+        - findByName
+        select m from Member m where m.name = ?
+        이렇게 자동으로 쿼리를 만들어준다.
+     */
 }
